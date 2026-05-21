@@ -55,3 +55,8 @@ playground.xcworkspace
 
 # Logs
 *.log
+
+# Local agent/session context
+.agents.local.md
+.claude.local.md
+.codex.local.md
