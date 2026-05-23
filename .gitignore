@@ -60,3 +60,6 @@ playground.xcworkspace
 .agents.local.md
 .claude.local.md
 .codex.local.md
+.agents/local-context.md
+.claude/local-context.md
+.codex/local-context.md

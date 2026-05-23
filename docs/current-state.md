@@ -8,6 +8,7 @@ Phase 1 MVP implementation has started. The app is no longer just a Phase 0 vali
 
 ## Implemented
 
+- `AGENTS.md` is stable repo policy only. Durable handoff state belongs here, and local/session-only context belongs in ignored local files.
 - SwiftData model container initialized in `StashApp`.
 - `StorageContainer` model with stable `qrID`, name, optional location/details, tags, timestamps, and cascade-owned items.
 - `InventoryItem` model with name, quantity, optional notes, tags, timestamps, and parent container.
@@ -36,6 +37,7 @@ This command succeeded outside the sandbox on 2026-05-23 after the managed-locat
 
 ## Next Work
 
+- Implement TPSH-020: item and bin photos with thumbnail behavior.
 - Add manual JSON export for local data portability.
 - Run the app on a physical iPhone and verify create/edit/delete, saved location, and all-items filter flows against the on-device SwiftData store.
 - Re-test the existing printed label against a newly created real container, not just the Phase 0 validation container.
