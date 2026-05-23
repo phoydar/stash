@@ -1,8 +1,8 @@
 # Stash
 
-Stash is a planned native iOS app for managing physical storage containers with QR labels. The app will let a user create containers, add inventory items, print QR labels through the NIIMBOT app, and scan a physical label to open the matching container on-device.
+Stash is a native iOS app for managing physical storage containers with QR labels. The app lets a user create containers, add inventory items, generate printable QR label sheets, and scan a physical label to open the matching container on-device.
 
-The project is currently in planning and Phase 0 validation. The full product direction lives in [qr-container-inventory-prd.md](qr-container-inventory-prd.md).
+The project is in Phase 1 MVP implementation after the initial Phase 0 print/scan loop was proven manually. The full product direction lives in [qr-container-inventory-prd.md](qr-container-inventory-prd.md).
 
 ## Product Goal
 
@@ -12,26 +12,71 @@ Stash should:
 
 - Store inventory locally on the phone.
 - Generate stable QR labels for storage containers.
-- Print labels through the NIIMBOT app using the iOS share sheet.
+- Export printable PDF label sheets for desktop printing on adhesive label stock.
 - Scan a printed label and open the matching container.
 - Work offline.
 - Provide manual export so local-only data is not trapped on one device.
 
 ## Current Status
 
-Status: Phase 0 validation.
+Status: Phase 1 app foundation started.
 
-Before building the full app, the first development milestone is to prove the physical label loop:
+Phase 0 manually proved the export/scan/deep-link loop:
 
 1. Generate a QR payload like `stash://container/{uuid}`.
-2. Render it into a black-on-white PNG label.
-3. Share the PNG into the NIIMBOT app.
-4. Print it on the intended label stock.
-5. Scan the printed QR from normal phone distances.
-6. Confirm the payload parses and routes to the expected local container.
-7. Record the calibrated label size, QR size, margins, and NIIMBOT import notes.
+2. Render it into a black-on-white label.
+3. Export a US Letter PDF label sheet.
+4. Scan the exported label from the phone.
+5. Confirm the payload parses and opens Stash.
 
-This de-risks the part of the project most likely to cause rework: physical print scale and QR scan reliability.
+The remaining Phase 0 documentation task is physical print calibration: print at 100% scale, test the adhesive label in realistic conditions, and record the calibrated sheet stock, printer settings, label size, QR size, and margins.
+
+## Phase 1 App
+
+The repo now includes a SwiftUI iOS app backed by SwiftData.
+
+Open the generated Xcode project:
+
+```bash
+open Stash.xcodeproj
+```
+
+If the project needs to be regenerated after editing `project.yml`:
+
+```bash
+xcodegen generate
+```
+
+Build from the command line without code signing:
+
+```bash
+xcodebuild -project Stash.xcodeproj -scheme Stash -destination generic/platform=iOS -derivedDataPath .build/DerivedData CODE_SIGNING_ALLOWED=NO build
+```
+
+Compile the app and test bundle:
+
+```bash
+xcodebuild -project Stash.xcodeproj -scheme Stash -destination generic/platform=iOS -derivedDataPath .build/DerivedData CODE_SIGNING_ALLOWED=NO build-for-testing
+```
+
+The app currently provides:
+
+- SwiftData `StorageContainer` and `InventoryItem` models.
+- Reusable saved locations for container create/edit flows.
+- Container create, read, update, and delete flows.
+- Item create, read, update, delete, and quantity tracking.
+- All-items inventory view with tag and location filters.
+- A stable `stash://container/{uuid}` payload per container.
+- A black-on-white QR label preview per container.
+- A share-sheet handoff that exports a printable PDF label sheet for desktop printing.
+- An AVFoundation QR scanner with permission handling and torch support.
+- Deep-link and in-app scanner routing to matching local containers.
+- Basic search across containers, locations, details, tags, and item text.
+
+Physical validation should be recorded in:
+
+- [docs/phase-0-test-plan.md](docs/phase-0-test-plan.md)
+- [docs/phase-0-label-calibration.md](docs/phase-0-label-calibration.md)
 
 ## Planned Stack
 
@@ -44,8 +89,8 @@ This de-risks the part of the project most likely to cause rework: physical prin
 | Navigation | `NavigationStack` with typed routes |
 | QR generation | Core Image |
 | QR scanning | AVFoundation |
-| Label rendering | `UIGraphicsImageRenderer` to PNG |
-| Printing | iOS share sheet to NIIMBOT |
+| Label rendering | `UIGraphicsImageRenderer` for preview, `UIGraphicsPDFRenderer` for sheets |
+| Printing | Desktop printer from PDF label sheets |
 | Distribution | Personal install through Xcode |
 
 ## QR Payload
@@ -62,25 +107,25 @@ The app should also support parsing a bare UUID during development and for backw
 
 Phase 0 is complete when:
 
-- NIIMBOT can import the generated PNG from the iOS share sheet.
+- A generated PDF label sheet prints at 100% scale on the selected adhesive label stock.
 - The printed QR scans reliably.
 - The printed QR decodes to `stash://container/{uuid}`.
 - The parser extracts the expected UUID.
 - The validation app can route the scanned UUID to a known local test container or validation result.
-- Final label dimensions, QR size, quiet zone, margins, and NIIMBOT-specific notes are documented.
+- Final sheet stock, printer settings, label dimensions, QR size, quiet zone, and margins are documented.
 
 ## Phase 1 MVP Scope
 
-After Phase 0 passes, the MVP should include:
+Phase 1 MVP scope:
 
-- SwiftData models for containers and items.
-- Container create, read, update, and delete flows.
-- Item create, read, update, delete, and basic quantity tracking.
-- QR payload generation and parsing.
-- Label preview and share-sheet handoff.
-- Camera scanner with permission handling.
-- Basic search across containers and items.
-- Manual JSON export.
+- [x] SwiftData models for containers and items.
+- [x] Container create, read, update, and delete flows.
+- [x] Item create, read, update, delete, and basic quantity tracking.
+- [x] QR payload generation and parsing.
+- [x] Label preview and PDF label-sheet export.
+- [x] Camera scanner with permission handling.
+- [x] Basic search across containers and items.
+- [ ] Manual JSON export.
 
 ## Project Files
 
@@ -88,27 +133,33 @@ After Phase 0 passes, the MVP should include:
 .
 ├── README.md
 ├── qr-container-inventory-prd.md
-└── AGENTS.md
+├── docs/
+├── project.yml
+├── Stash.xcodeproj/
+├── Stash/
+└── StashTests/
 ```
 
-Expected app structure after project creation:
+Current app structure:
 
 ```text
-ContainerInventory/
-├── ContainerInventoryApp.swift
+Stash/
+├── App/
 ├── Config.swift
+├── Components/
 ├── Models/
 ├── Navigation/
+├── Resources/
 ├── Services/
 ├── Views/
-└── Components/
+└── Utilities/
 ```
 
 ## Development Notes
 
 - Keep container QR identities stable. A container's QR ID should not change during normal edits.
-- Treat NIIMBOT label dimensions as calibrated implementation data, not a fixed assumption.
-- Prefer file-backed PNG sharing over raw `UIImage` sharing for better behavior in external apps.
+- Treat label sheet dimensions, printer scaling, and printable margins as calibrated implementation data, not fixed assumptions.
+- Print validation PDFs at actual size / 100% scale. Browser or Preview auto-fit scaling can invalidate QR size and alignment tests.
 - Do not add backend, account, or sync complexity before the local app flow works end to end.
 - Commit `Package.resolved` if Swift Package Manager dependencies are added to the app project.
 

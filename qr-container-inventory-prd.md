@@ -1,6 +1,6 @@
 # PRD: QR Container Inventory — iOS App
 
-**Version:** 1.1  
+**Version:** 1.2
 **Author:** Patrick Hoy  
 **Status:** Reviewed; ready for Phase 0 validation before full build  
 **Target Platform:** iOS 17+  
@@ -10,7 +10,7 @@
 
 ## 1. Overview
 
-A native SwiftUI iOS app for managing physical storage containers (bins, boxes, totes, toolboxes) using QR codes. Each container gets a unique QR label printed through the NIIMBOT app for a NIIMBOT B1 Bluetooth label printer. Scanning the QR code opens that container's contents in the app. All inventory data is stored locally on-device using SwiftData — no backend and no network required.
+A native SwiftUI iOS app for managing physical storage containers (bins, boxes, totes, toolboxes) using QR codes. Each container gets a unique QR label printed from a PDF label sheet on standard desktop-printer adhesive label stock. Scanning the QR code opens that container's contents in the app. All inventory data is stored locally on-device using SwiftData — no backend and no network required.
 
 The recommended QR payload is an app URL (`stash://container/{uuid}`), not a bare UUID. The app remains fully local, but the URL format is more useful: it can be scanned by the in-app scanner, is future-compatible with deep links, and can open the installed app from the iOS Camera app if the URL scheme is registered.
 
@@ -20,7 +20,7 @@ The recommended QR payload is an app URL (`stash://container/{uuid}`), not a bar
 
 - Quickly find which container an item is in
 - Add, edit, move, and manage items per container from the phone
-- Generate QR labels in the app and hand them off to NIIMBOT for printing
+- Generate QR labels in the app and export printable PDF label sheets
 - Scan a physical label and land directly on the matching container
 - Work fully offline
 - Provide a simple manual export path so local-only data is not trapped on one phone
@@ -33,7 +33,8 @@ The recommended QR payload is an app URL (`stash://container/{uuid}`), not a bar
 - No multi-user or sharing features
 - No barcode scanning for individual items in v1
 - No App Store distribution
-- No direct Bluetooth protocol integration with the NIIMBOT printer in v1
+- No direct Bluetooth label-printer integration in v1
+- No dependency on vendor-specific label-printer mobile apps in v1
 
 ---
 
@@ -46,16 +47,16 @@ The recommended QR payload is an app URL (`stash://container/{uuid}`), not a bar
 | Navigation | `NavigationStack` with typed routes |
 | Persistence | SwiftData (iOS 17+) |
 | QR Generation | Core Image `CIFilter.qrCodeGenerator()` |
-| Label Rendering | `UIGraphicsImageRenderer`, rendered to PNG |
+| Label Rendering | `UIGraphicsImageRenderer` for preview, `UIGraphicsPDFRenderer` for sheets |
 | QR Scanning | AVFoundation `AVCaptureSession` + `AVCaptureMetadataOutput` |
-| Label Handoff | SwiftUI sheet wrapping `UIActivityViewController`, sharing a PNG file URL |
+| Label Handoff | SwiftUI sheet wrapping `UIActivityViewController`, sharing a PDF file URL |
 | Minimum iOS | 17.0 |
 
 Key implementation adjustments from the original draft:
 
 - Use a `stash://container/{uuid}` payload and support parsing both the URL format and bare UUIDs for development/backward compatibility.
-- Share a generated PNG file URL instead of a raw `UIImage`; external apps tend to handle file-backed image shares more predictably.
-- Treat the NIIMBOT label dimensions as a calibration step, not a fixed truth. Start with a 400x240 pixel template for a 50x30 mm label at 203 dpi, then verify print scale and margins on the actual B1/label stock.
+- Share a generated PDF file URL instead of a raw image; desktop printing needs stable page dimensions and repeatable placement.
+- Treat the selected label sheet, printer scaling, and printable margins as calibration data, not fixed truth. Start with Avery 5160/8160-compatible US Letter geometry, then verify print scale and scan reliability on the actual printer and label stock.
 - Keep SwiftData model names domain-specific (`StorageContainer`, `InventoryItem`) instead of a broad `Container` type name.
 - Explicitly define relationship inverses and cascade behavior.
 
@@ -202,7 +203,7 @@ TabView
 │                       ├── + Add Item -> AddEditItemView sheet
 │                       ├── Edit Container -> AddEditContainerView sheet
 │                       ├── QR Code preview
-│                       └── Print Label -> ActivityView share sheet
+│                       └── Export Label Sheet -> ActivityView share sheet
 │
 ├── Tab 2: Search
 │     └── NavigationStack
@@ -240,7 +241,7 @@ enum AppRoute: Hashable {
 
 - Header: container name, location, details, tags
 - QR code preview image, with tap-to-enlarge in Phase 2
-- **Print Label** button generates a PNG label and opens `ActivityView`
+- **Export Label Sheet** button generates a PDF label sheet and opens `ActivityView`
 - Items section lists name, quantity, notes, and tags
 - Add, edit, delete, and move items
 - Edit button opens `AddEditContainerView` pre-populated
@@ -364,27 +365,28 @@ func generateQRCode(from string: String, size: CGSize) -> UIImage {
 
 ### Label Composition
 
-Start with a **400x240 px** template. This approximates a 50x30 mm label at 203 dpi, but the first build must include a physical print calibration pass because NIIMBOT app import behavior, printable margins, and actual label stock can change the final scale.
+Start with **Avery 5160/8160-compatible US Letter sheets**: 30 labels per page, 3 columns by 10 rows, each label 2.625 in by 1 in. The first build must include a physical print calibration pass because printer drivers, printable margins, label stock, and "fit to page" defaults can change the final scale.
 
-Recommended v1 label layout:
+Recommended v1 label layout for each 2.625 in by 1 in label:
 
 ```text
-┌──────────────────────────────────────────┐
-│ [QR Code 176x176]   Container Name       │
-│                     Location             │
-│                     #tag1 #tag2          │
-└──────────────────────────────────────────┘
+┌──────────────────────────────┐
+│ [QR]  Container Name         │
+│       Location               │
+│       #tag1 #tag2            │
+└──────────────────────────────┘
 ```
 
 Label rendering requirements:
 
-- Render black on white only for thermal print clarity.
+- Render black on white only for print clarity.
 - Keep a quiet zone around the QR code.
 - Use dynamic text fitting or truncation for long container names.
-- Store/share the label as PNG, not JPEG.
-- Include a preview before sharing so bad layout is obvious before printing.
+- Store/share sheet output as PDF, not JPEG.
+- Include a preview before export so bad layout is obvious before printing.
+- Print PDF output at actual size / 100% scale.
 
-### Share Sheet
+### PDF Sheet Export
 
 Use a SwiftUI sheet with a small `UIViewControllerRepresentable` wrapper around `UIActivityViewController`.
 
@@ -402,11 +404,11 @@ struct ActivityView: UIViewControllerRepresentable {
 
 Print flow:
 
-1. Tap **Print Label** in `ContainerDetailView`
-2. App generates a PNG label file in a temporary directory
+1. Tap **Export Label Sheet** in `ContainerDetailView`
+2. App generates a PDF label sheet file in a temporary directory
 3. SwiftUI presents `ActivityView`
-4. User selects **NIIMBOT** from the share sheet
-5. User confirms print in NIIMBOT
+4. User saves, AirDrops, emails, or otherwise moves the PDF to the desktop print path
+5. User prints the PDF at actual size / 100% scale on the selected adhesive label sheet
 6. User scans the printed QR with the app to verify it resolves
 
 ---
@@ -440,11 +442,17 @@ Print flow:
 enum Config {
     static let appURLScheme = "stash"
 
-    // Starting point only. Verify against the actual B1, NIIMBOT app, and label roll.
-    static let labelDPI: CGFloat = 203
-    static let labelSizePixels = CGSize(width: 400, height: 240)
-    static let qrSizePixels: CGFloat = 176
-    static let labelPaddingPixels: CGFloat = 12
+    // Starting point only. Verify against the actual printer and label sheet.
+    static let sheetPageSizePoints = CGSize(width: 612, height: 792) // US Letter at 72 pt/in.
+    static let sheetLabelSizePoints = CGSize(width: 189, height: 72) // Avery 5160/8160.
+    static let sheetColumns = 3
+    static let sheetRows = 10
+    static let sheetLeftMarginPoints: CGFloat = 13.5
+    static let sheetTopMarginPoints: CGFloat = 36
+    static let sheetHorizontalPitchPoints: CGFloat = 198
+    static let sheetVerticalPitchPoints: CGFloat = 72
+    static let sheetQRSizePoints: CGFloat = 52
+    static let sheetLabelPaddingPoints: CGFloat = 7
 }
 ```
 
@@ -454,11 +462,11 @@ enum Config {
 
 ### Phase 0 — Print/Scan Validation (Target: 2-4 hours)
 
-- [ ] Create a throwaway SwiftUI screen or playground utility that generates one QR label PNG
-- [ ] Share the PNG into NIIMBOT and print it on the intended label stock
+- [ ] Create a throwaway SwiftUI screen or utility that generates one printable PDF label sheet
+- [ ] Print the PDF at actual size / 100% scale on the intended desktop-printer label sheet
 - [ ] Verify the printed QR scans reliably from normal phone distances
 - [ ] Confirm whether iOS Camera opens the app via `stash://container/{uuid}`
-- [ ] Adjust label pixel size, QR size, margins, and text layout based on the physical print
+- [ ] Adjust sheet stock, QR size, margins, and text layout based on the physical print
 
 ### Phase 1 — MVP (Target: 1 weekend)
 
@@ -467,7 +475,7 @@ enum Config {
 - [ ] `ContainerListView` with add, edit, delete
 - [ ] `ContainerDetailView` with item list and item CRUD
 - [ ] QR payload parser and QR generation
-- [ ] Label preview and share-sheet handoff to NIIMBOT
+- [ ] Label preview and PDF label-sheet export
 - [ ] `ScannerView` with camera permission handling and QR lookup
 - [ ] Basic search across containers and items
 - [ ] Manual JSON export
@@ -492,8 +500,8 @@ enum Config {
 ## 14. Known Constraints & Risks
 
 - **iOS 17+ required** — SwiftData is unavailable on older iOS versions.
-- **NIIMBOT app must be installed** — v1 depends on the share sheet and cannot print directly over Bluetooth.
-- **NIIMBOT import behavior must be tested** — share-sheet support and physical scaling are the highest-risk assumptions.
+- **Desktop print scaling must be controlled** — labels must be printed at actual size / 100%, not fit-to-page.
+- **Label sheet alignment must be tested** — printer margins, sheet feed accuracy, and label stock geometry are the highest-risk assumptions.
 - **Direct Xcode install has signing/provisioning friction** — personal installs may need periodic redeploying unless signed with a paid developer account or another durable distribution path.
 - **Local-only storage can be lost** — iCloud device backup may help, but the app should provide manual JSON export in MVP.
 - **URL scheme collisions are possible** — `stash` is convenient but not globally unique. If this ever ships beyond personal use, use a more specific scheme.
@@ -509,7 +517,7 @@ enum Config {
 | Add item | Item appears under correct container with name and quantity |
 | Edit item/container | Changes persist after app relaunch |
 | Generate QR | QR decodes to `stash://container/{uuid}` and parser extracts the UUID |
-| Print label | Share sheet opens with a PNG label; NIIMBOT can import it |
+| Print label | Share sheet opens with a PDF label sheet; the desktop print path preserves actual size |
 | Physical scan | Printed QR scans reliably and opens the correct container |
 | Unknown scan | Unknown/deleted IDs show a clear not-found message |
 | Search | Typing a term returns matching containers and items |
@@ -521,7 +529,7 @@ enum Config {
 
 ## 16. Open Decisions
 
-- Exact label stock size to optimize for: 50x30 mm is a good starting assumption, but validate against the rolls you actually plan to use.
+- Exact label stock size to optimize for: Avery 5160/8160 is the starting assumption, but validate against the sheets you actually plan to use.
 - App name and URL scheme: `Stash` / `stash://` are concise, but a more unique scheme avoids future collisions.
 - Whether search belongs in the first weekend MVP depends on expected inventory size. Because "find which container an item is in" is the core job, this PRD keeps basic search in Phase 1.
 - Whether JSON import is worth building immediately. Export is important for safety; import can wait unless you plan to migrate between devices soon.
