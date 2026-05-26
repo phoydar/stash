@@ -35,6 +35,10 @@ The remaining Phase 0 documentation task is physical print calibration: print at
 
 The repo now includes a SwiftUI iOS app backed by SwiftData.
 
+The app uses the Sugarbuzz `theme-stash` design direction: terracotta primary actions,
+deep-teal support accents, and warm-stone neutral surfaces. Repo-local product and
+design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md).
+
 Open the generated Xcode project:
 
 ```bash
@@ -137,6 +141,8 @@ Phase 1 MVP scope:
 ```text
 .
 ├── README.md
+├── PRODUCT.md
+├── DESIGN.md
 ├── qr-container-inventory-prd.md
 ├── docs/
 ├── project.yml

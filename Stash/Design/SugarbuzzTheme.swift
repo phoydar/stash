@@ -17,30 +17,30 @@ enum SBSpacing {
 }
 
 extension Color {
-    static let sbCanvas = Color(uiColor: .sbDynamic(light: 0xFAFAFA, dark: 0x0A0A0B))
-    static let sbCanvasInset = Color(uiColor: .sbDynamic(light: 0xF4F4F5, dark: 0x060607))
-    static let sbSurface = Color(uiColor: .sbDynamic(light: 0xFFFFFF, dark: 0x131316))
-    static let sbSurfaceHover = Color(uiColor: .sbDynamic(light: 0xF4F4F5, dark: 0x1C1C20))
-    static let sbSurfaceSelected = Color(uiColor: .sbDynamic(light: 0xE4E4E7, dark: 0x26262B))
+    static let sbCanvas = Color(uiColor: .sbDynamic(light: 0xFAF8F4, dark: 0x1A1612))
+    static let sbCanvasInset = Color(uiColor: .sbDynamic(light: 0xF0EBE3, dark: 0x100D0A))
+    static let sbSurface = Color(uiColor: .sbDynamic(light: 0xFFFFFF, dark: 0x221E18))
+    static let sbSurfaceHover = Color(uiColor: .sbDynamic(light: 0xF0EBE3, dark: 0x2C2620))
+    static let sbSurfaceSelected = Color(uiColor: .sbDynamic(light: 0xE4DDD0, dark: 0x38312A))
 
-    static let sbTextPrimary = Color(uiColor: .sbDynamic(light: 0x09090B, dark: 0xFAFAFA))
-    static let sbTextSecondary = Color(uiColor: .sbDynamic(light: 0x52525B, dark: 0xA1A1AA))
-    static let sbTextTertiary = Color(uiColor: .sbDynamic(light: 0x71717A, dark: 0x71717A))
-    static let sbTextPlaceholder = Color(uiColor: .sbDynamic(light: 0xA1A1AA, dark: 0x52525B))
+    static let sbTextPrimary = Color(uiColor: .sbDynamic(light: 0x1F1B16, dark: 0xF5EFE6))
+    static let sbTextSecondary = Color(uiColor: .sbDynamic(light: 0x524A3D, dark: 0xB5A993))
+    static let sbTextTertiary = Color(uiColor: .sbDynamic(light: 0x7C7261, dark: 0x847A6A))
+    static let sbTextPlaceholder = Color(uiColor: .sbDynamic(light: 0xADA290, dark: 0x5C5446))
 
-    static let sbBorder = Color(uiColor: .sbDynamic(light: 0xE4E4E7, dark: 0x26262B))
-    static let sbBorderStrong = Color(uiColor: .sbDynamic(light: 0xD4D4D8, dark: 0x3F3F46))
-    static let sbBorderSubtle = Color(uiColor: .sbDynamic(light: 0xF0F0F2, dark: 0x1C1C20))
+    static let sbBorder = Color(uiColor: .sbDynamic(light: 0xE4DDD0, dark: 0x2C2620))
+    static let sbBorderStrong = Color(uiColor: .sbDynamic(light: 0xC5BBA8, dark: 0x463E33))
+    static let sbBorderSubtle = Color(uiColor: .sbDynamic(light: 0xEFE9DE, dark: 0x221E18))
 
-    static let sbBuzz = Color(uiColor: .sbDynamic(light: 0xEC4080, dark: 0xF472B6))
-    static let sbBuzzPressed = Color(uiColor: .sbDynamic(light: 0xBE2362, dark: 0xEC4080))
-    static let sbBuzzSoft = Color(uiColor: .sbDynamic(light: 0xFCE7F0, dark: 0x2A1320))
-    static let sbBuzzInk = Color(uiColor: .sbDynamic(light: 0xFFFFFF, dark: 0x0A0A0B))
+    static let sbBuzz = Color(uiColor: .sbDynamic(light: 0xC2410C, dark: 0xFB923C))
+    static let sbBuzzPressed = Color(uiColor: .sbDynamic(light: 0x7A2808, dark: 0xEA580C))
+    static let sbBuzzSoft = Color(uiColor: .sbDynamic(light: 0xFBE4D5, dark: 0x2D1B0F))
+    static let sbBuzzInk = Color(uiColor: .sbDynamic(light: 0xFFFFFF, dark: 0x1A1612))
 
-    static let sbHoney = Color(uiColor: .sbDynamic(light: 0xF59E0B, dark: 0xFBBF24))
-    static let sbHoneySoft = Color(uiColor: .sbDynamic(light: 0xFEF3C7, dark: 0x2A2010))
-    static let sbMoss = Color(uiColor: .sbDynamic(light: 0x16A34A, dark: 0x34D399))
-    static let sbMossSoft = Color(uiColor: .sbDynamic(light: 0xDCFCE7, dark: 0x0E2A1C))
+    static let sbHoney = Color(uiColor: .sbDynamic(light: 0x0F766E, dark: 0x2DD4BF))
+    static let sbHoneySoft = Color(uiColor: .sbDynamic(light: 0xCCFBF1, dark: 0x0E2926))
+    static let sbMoss = Color(uiColor: .sbDynamic(light: 0x4D7C0F, dark: 0xA3E635))
+    static let sbMossSoft = Color(uiColor: .sbDynamic(light: 0xE8F2D8, dark: 0x1A2A09))
 }
 
 extension UIColor {
