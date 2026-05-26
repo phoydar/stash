@@ -178,33 +178,40 @@ private struct InventoryItemRow: View {
     let entry: InventoryItemEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(entry.item.name)
-                    .font(.headline)
-                    .foregroundStyle(Color.sbTextPrimary)
-                    .lineLimit(2)
+        HStack(spacing: SBSpacing.medium) {
+            PhotoThumbnailView(
+                filename: entry.item.photoFilename,
+                fallbackSystemImage: "photo"
+            )
 
-                Spacer(minLength: SBSpacing.small)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(entry.item.name)
+                        .font(.headline)
+                        .foregroundStyle(Color.sbTextPrimary)
+                        .lineLimit(2)
 
-                Text("x\(entry.item.quantity)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.sbTextSecondary)
-            }
+                    Spacer(minLength: SBSpacing.small)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(entry.container.name)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.sbTextSecondary)
-
-                if let location = entry.container.normalizedLocation {
-                    Label(location, systemImage: "mappin.and.ellipse")
-                        .font(.caption)
-                        .foregroundStyle(Color.sbTextTertiary)
+                    Text("x\(entry.item.quantity)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.sbTextSecondary)
                 }
-            }
 
-            TagChipsView(tags: entry.item.tags)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(entry.container.name)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.sbTextSecondary)
+
+                    if let location = entry.container.normalizedLocation {
+                        Label(location, systemImage: "mappin.and.ellipse")
+                            .font(.caption)
+                            .foregroundStyle(Color.sbTextTertiary)
+                    }
+                }
+
+                TagChipsView(tags: entry.item.tags)
+            }
         }
         .padding(.vertical, 4)
     }

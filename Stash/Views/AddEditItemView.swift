@@ -12,6 +12,9 @@ struct AddEditItemView: View {
     @State private var quantity: Int
     @State private var notes: String
     @State private var tags: [String]
+    @State private var selectedPhotoData: Data?
+    @State private var shouldRemovePhoto = false
+    @State private var errorMessage: String?
 
     init(container: StorageContainer, item: InventoryItem? = nil) {
         self.container = container
@@ -40,6 +43,15 @@ struct AddEditItemView: View {
                     TagEditorView(tags: $tags)
                 }
 
+                PhotoPickerSection(
+                    title: "Item photo",
+                    existingFilename: item?.photoFilename,
+                    emptyTitle: "No item photo",
+                    emptySystemImage: "photo",
+                    selectedPhotoData: $selectedPhotoData,
+                    shouldRemoveExistingPhoto: $shouldRemovePhoto
+                )
+
                 Section("Notes") {
                     TextEditor(text: $notes)
                         .frame(minHeight: 100)
@@ -64,31 +76,58 @@ struct AddEditItemView: View {
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .alert("Item error", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage ?? "")
+            }
         }
     }
 
     private func save() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if let item {
-            item.name = trimmedName
-            item.quantity = quantity
-            item.notes = TagParsing.optionalText(notes)
-            item.tags = tags
-            item.touch()
-        } else {
-            let item = InventoryItem(
-                name: trimmedName,
-                quantity: quantity,
-                notes: TagParsing.optionalText(notes),
-                tags: tags,
-                container: container
-            )
-            modelContext.insert(item)
-            container.items.append(item)
-            container.touch()
+        do {
+            if let item {
+                item.name = trimmedName
+                item.quantity = quantity
+                item.notes = TagParsing.optionalText(notes)
+                item.photoFilename = try resolvedPhotoFilename(existingFilename: item.photoFilename)
+                item.tags = tags
+                item.touch()
+            } else {
+                let item = InventoryItem(
+                    name: trimmedName,
+                    quantity: quantity,
+                    notes: TagParsing.optionalText(notes),
+                    photoFilename: try resolvedPhotoFilename(existingFilename: nil),
+                    tags: tags,
+                    container: container
+                )
+                modelContext.insert(item)
+                container.items.append(item)
+                container.touch()
+            }
+
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func resolvedPhotoFilename(existingFilename: String?) throws -> String? {
+        if let selectedPhotoData {
+            return try PhotoStore.shared.saveImageData(selectedPhotoData, replacing: existingFilename)
         }
 
-        dismiss()
+        if shouldRemovePhoto {
+            PhotoStore.shared.deletePhoto(filename: existingFilename)
+            return nil
+        }
+
+        return existingFilename
     }
 }

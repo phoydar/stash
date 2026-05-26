@@ -28,6 +28,7 @@ struct ContainerListView: View {
                             .listRowBackground(Color.sbSurface)
                             .swipeActions {
                                 Button("Delete", role: .destructive) {
+                                    PhotoStore.shared.deletePhotos(for: container)
                                     modelContext.delete(container)
                                 }
                             }
@@ -76,26 +77,33 @@ private struct ContainerRow: View {
     let container: StorageContainer
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(container.name)
-                .font(.headline)
-                .foregroundStyle(Color.sbTextPrimary)
+        HStack(spacing: SBSpacing.medium) {
+            PhotoThumbnailView(
+                filename: container.photoFilename,
+                fallbackSystemImage: "shippingbox"
+            )
 
-            if let location = container.location, !location.isEmpty {
-                Text(location)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.sbTextSecondary)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(container.name)
+                    .font(.headline)
+                    .foregroundStyle(Color.sbTextPrimary)
+
+                if let location = container.location, !location.isEmpty {
+                    Text(location)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.sbTextSecondary)
+                }
+
+                HStack(spacing: 8) {
+                    Label("\(container.items.count)", systemImage: "list.bullet")
+                    Text(container.qrID.uuidString.prefix(8))
+                        .font(.caption.monospaced())
+                }
+                .font(.caption)
+                .foregroundStyle(Color.sbTextTertiary)
+
+                TagChipsView(tags: container.tags)
             }
-
-            HStack(spacing: 8) {
-                Label("\(container.items.count)", systemImage: "list.bullet")
-                Text(container.qrID.uuidString.prefix(8))
-                    .font(.caption.monospaced())
-            }
-            .font(.caption)
-            .foregroundStyle(Color.sbTextTertiary)
-
-            TagChipsView(tags: container.tags)
         }
         .padding(.vertical, 4)
     }

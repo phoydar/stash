@@ -35,6 +35,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Used to scan QR codes on storage containers.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to choose photos for stored items and bins.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

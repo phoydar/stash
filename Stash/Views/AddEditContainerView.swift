@@ -16,6 +16,9 @@ struct AddEditContainerView: View {
     @State private var selectedLocationID: UUID?
     @State private var newLocationName = ""
     @State private var isAddingLocation = false
+    @State private var selectedPhotoData: Data?
+    @State private var shouldRemovePhoto = false
+    @State private var errorMessage: String?
 
     init(container: StorageContainer? = nil) {
         self.container = container
@@ -33,6 +36,15 @@ struct AddEditContainerView: View {
                     TextField("Container name", text: $name)
                     TagEditorView(tags: $tags)
                 }
+
+                PhotoPickerSection(
+                    title: "Bin photo",
+                    existingFilename: container?.photoFilename,
+                    emptyTitle: "No bin photo",
+                    emptySystemImage: "shippingbox",
+                    selectedPhotoData: $selectedPhotoData,
+                    shouldRemoveExistingPhoto: $shouldRemovePhoto
+                )
 
                 Section("Location") {
                     if managedLocations.isEmpty {
@@ -143,43 +155,70 @@ struct AddEditContainerView: View {
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .alert("Container error", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage ?? "")
+            }
         }
     }
 
     private func save() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if let container {
-            container.name = trimmedName
-            container.location = resolvedLocationForSave()
-            container.details = TagParsing.optionalText(details)
-            container.tags = tags
-            container.touch()
-        } else {
-            let container = StorageContainer(
-                name: trimmedName,
-                location: resolvedLocationForSave(),
-                details: TagParsing.optionalText(details),
-                tags: tags
-            )
-            modelContext.insert(container)
-            for draft in initialItems {
-                let itemName = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !itemName.isEmpty else {
-                    continue
-                }
-
-                let item = InventoryItem(
-                    name: itemName,
-                    quantity: draft.quantity,
-                    container: container
+        do {
+            if let container {
+                container.name = trimmedName
+                container.location = resolvedLocationForSave()
+                container.details = TagParsing.optionalText(details)
+                container.photoFilename = try resolvedPhotoFilename(existingFilename: container.photoFilename)
+                container.tags = tags
+                container.touch()
+            } else {
+                let container = StorageContainer(
+                    name: trimmedName,
+                    location: resolvedLocationForSave(),
+                    details: TagParsing.optionalText(details),
+                    photoFilename: try resolvedPhotoFilename(existingFilename: nil),
+                    tags: tags
                 )
-                modelContext.insert(item)
-                container.items.append(item)
+                modelContext.insert(container)
+                for draft in initialItems {
+                    let itemName = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !itemName.isEmpty else {
+                        continue
+                    }
+
+                    let item = InventoryItem(
+                        name: itemName,
+                        quantity: draft.quantity,
+                        container: container
+                    )
+                    modelContext.insert(item)
+                    container.items.append(item)
+                }
             }
+
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func resolvedPhotoFilename(existingFilename: String?) throws -> String? {
+        if let selectedPhotoData {
+            return try PhotoStore.shared.saveImageData(selectedPhotoData, replacing: existingFilename)
         }
 
-        dismiss()
+        if shouldRemovePhoto {
+            PhotoStore.shared.deletePhoto(filename: existingFilename)
+            return nil
+        }
+
+        return existingFilename
     }
 
     private var locationSelection: Binding<UUID?> {

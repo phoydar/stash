@@ -56,31 +56,38 @@ private struct SearchResultRow: View {
     let container: StorageContainer
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(container.name)
-                .font(.headline)
-                .foregroundStyle(Color.sbTextPrimary)
+        HStack(spacing: SBSpacing.medium) {
+            PhotoThumbnailView(
+                filename: container.photoFilename,
+                fallbackSystemImage: "shippingbox"
+            )
 
-            if let location = container.location, !location.isEmpty {
-                Text(location)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.sbTextSecondary)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(container.name)
+                    .font(.headline)
+                    .foregroundStyle(Color.sbTextPrimary)
+
+                if let location = container.location, !location.isEmpty {
+                    Text(location)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.sbTextSecondary)
+                }
+
+                let itemPreview = container.items
+                    .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                    .prefix(3)
+                    .map(\.name)
+                    .joined(separator: ", ")
+
+                if !itemPreview.isEmpty {
+                    Text(itemPreview)
+                        .font(.caption)
+                        .foregroundStyle(Color.sbTextTertiary)
+                        .lineLimit(2)
+                }
+
+                TagChipsView(tags: container.tags)
             }
-
-            let itemPreview = container.items
-                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-                .prefix(3)
-                .map(\.name)
-                .joined(separator: ", ")
-
-            if !itemPreview.isEmpty {
-                Text(itemPreview)
-                    .font(.caption)
-                    .foregroundStyle(Color.sbTextTertiary)
-                    .lineLimit(2)
-            }
-
-            TagChipsView(tags: container.tags)
         }
         .padding(.vertical, 4)
     }

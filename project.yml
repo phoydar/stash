@@ -27,6 +27,7 @@ targets:
               - stash
         LSRequiresIPhoneOS: true
         NSCameraUsageDescription: Used to scan QR codes on storage containers.
+        NSPhotoLibraryUsageDescription: Used to choose photos for stored items and bins.
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen: {}

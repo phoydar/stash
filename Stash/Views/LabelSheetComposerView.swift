@@ -33,7 +33,7 @@ struct LabelSheetComposerView: View {
                         ForEach(0..<configuration.labelsPerSheet, id: \.self) { index in
                             SheetSlotButton(
                                 number: index + 1,
-                                containerName: containerName(for: index)
+                                container: container(for: index)
                             ) {
                                 selectedSlot = SheetSlot(index: index)
                             }
@@ -123,11 +123,15 @@ struct LabelSheetComposerView: View {
     }
 
     private func containerName(for slotIndex: Int) -> String? {
+        container(for: slotIndex)?.name
+    }
+
+    private func container(for slotIndex: Int) -> StorageContainer? {
         guard let id = slotAssignments[slotIndex] else {
             return nil
         }
 
-        return containers.first { $0.qrID == id }?.name
+        return containers.first { $0.qrID == id }
     }
 
     private func exportLabelSheet() {
@@ -168,29 +172,39 @@ private struct SheetSlot: Identifiable {
 
 private struct SheetSlotButton: View {
     let number: Int
-    let containerName: String?
+    let container: StorageContainer?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("\(number)")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(containerName == nil ? Color.sbTextTertiary : Color.sbBuzz)
+                    .foregroundStyle(container == nil ? Color.sbTextTertiary : Color.sbBuzz)
 
-                Text(containerName ?? "Empty")
-                    .font(.caption)
-                    .fontWeight(containerName == nil ? .regular : .semibold)
-                    .foregroundStyle(containerName == nil ? Color.sbTextSecondary : Color.sbTextPrimary)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity, minHeight: 34, alignment: .topLeading)
+                HStack(alignment: .top, spacing: 6) {
+                    if let container, container.photoFilename != nil {
+                        PhotoThumbnailView(
+                            filename: container.photoFilename,
+                            size: 28,
+                            cornerRadius: SBRadius.base
+                        )
+                    }
+
+                    Text(container?.name ?? "Empty")
+                        .font(.caption)
+                        .fontWeight(container == nil ? .regular : .semibold)
+                        .foregroundStyle(container == nil ? Color.sbTextSecondary : Color.sbTextPrimary)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, minHeight: 34, alignment: .topLeading)
+                }
             }
             .padding(8)
             .frame(minHeight: 72)
             .sbCard(
                 cornerRadius: SBRadius.medium,
-                fill: containerName == nil ? .sbSurface : .sbBuzzSoft,
-                border: containerName == nil ? .sbBorder : .sbBuzz
+                fill: container == nil ? .sbSurface : .sbBuzzSoft,
+                border: container == nil ? .sbBorder : .sbBuzz
             )
         }
         .buttonStyle(.plain)
@@ -211,7 +225,12 @@ private struct LabelSlotPickerView: View {
                         Button {
                             onSelect(container.qrID)
                         } label: {
-                            HStack {
+                            HStack(spacing: SBSpacing.medium) {
+                                PhotoThumbnailView(
+                                    filename: container.photoFilename,
+                                    fallbackSystemImage: "shippingbox"
+                                )
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(container.name)
                                         .foregroundStyle(Color.sbTextPrimary)

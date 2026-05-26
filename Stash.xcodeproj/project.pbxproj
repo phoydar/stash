@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		0BB612A03087EF83CE86BD96 /* ActivityShareItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D55650C1C6FAC83B8F17A15 /* ActivityShareItem.swift */; };
 		0E6833CA8D568F2B70D0F41C /* TagEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 391F4AC805054C7548536948 /* TagEditorView.swift */; };
+		11F7E3A8C5D9427FB00A1002 /* PhotoViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F7E3A8C5D9427FB00A1001 /* PhotoViews.swift */; };
 		18D8BF206938C7EB2BD7952A /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F200B50EBDAC1774BAF639D /* ActivityView.swift */; };
+		22F7E3A8C5D9427FB00A2002 /* PhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F7E3A8C5D9427FB00A2001 /* PhotoStore.swift */; };
 		2003A68F8F034D6758A293C9 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = F255114A3B54B762F84BF9A1 /* Config.swift */; };
 		2EA6612CE7F6BBCA3B50DCE1 /* SugarbuzzTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727C436432BA8D97F15418B9 /* SugarbuzzTheme.swift */; };
 		2FA72C85C26533FBDD562273 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE6E61B1E37ACBDC367166D /* AppRoute.swift */; };
@@ -50,6 +52,8 @@
 
 /* Begin PBXFileReference section */
 		0CCFE923FC246B14AC5FA91D /* AddEditItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditItemView.swift; sourceTree = "<group>"; };
+		11F7E3A8C5D9427FB00A1001 /* PhotoViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViews.swift; sourceTree = "<group>"; };
+		22F7E3A8C5D9427FB00A2001 /* PhotoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoStore.swift; sourceTree = "<group>"; };
 		29FED4141A6F214DEC4C177F /* ValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationView.swift; sourceTree = "<group>"; };
 		2CA04D5CBA5899B1AA1BF41A /* TagParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagParsing.swift; sourceTree = "<group>"; };
 		2D55650C1C6FAC83B8F17A15 /* ActivityShareItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityShareItem.swift; sourceTree = "<group>"; };
@@ -147,6 +151,7 @@
 		BB45C1F26DFB869B198A4BEB /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				22F7E3A8C5D9427FB00A2001 /* PhotoStore.swift */,
 				53065CE8FE2EE1099A17A992 /* QRCodeService.swift */,
 				3C50BC1A729250995508C529 /* QRLabelService.swift */,
 				54B9B7813A6B0DD4C73976C6 /* QRPayload.swift */,
@@ -203,6 +208,7 @@
 			children = (
 				2D55650C1C6FAC83B8F17A15 /* ActivityShareItem.swift */,
 				8F200B50EBDAC1774BAF639D /* ActivityView.swift */,
+				11F7E3A8C5D9427FB00A1001 /* PhotoViews.swift */,
 				7C12640F49C76017DDC52549 /* TagChipsView.swift */,
 				391F4AC805054C7548536948 /* TagEditorView.swift */,
 			);
@@ -320,6 +326,8 @@
 				52E17FE343F39C82689E29B6 /* InventoryItem.swift in Sources */,
 				573C3D8C5A748EE1CCF7402D /* InventoryItemsView.swift in Sources */,
 				CAF51F748ACAAD28E1B04E80 /* LabelSheetComposerView.swift in Sources */,
+				22F7E3A8C5D9427FB00A2002 /* PhotoStore.swift in Sources */,
+				11F7E3A8C5D9427FB00A1002 /* PhotoViews.swift in Sources */,
 				AC82227B6BF8AF2F6A3E29C2 /* QRCodeService.swift in Sources */,
 				7418D61EE597FB33D8F2F89E /* QRLabelService.swift in Sources */,
 				F810A465DBC94E71103EED7A /* QRPayload.swift in Sources */,

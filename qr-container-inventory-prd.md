@@ -491,7 +491,7 @@ enum Config {
 ### Phase 3 — Nice to Have
 
 - [ ] CloudKit sync or iCloud document backup
-- [ ] Item photo support, preferably stored as files with references instead of large blobs in SwiftData
+- [x] Item and bin photo support, stored as files with SwiftData filename references
 - [ ] Quantity low flag ("need to restock")
 - [ ] Siri Shortcuts or Spotlight integration for quick lookup
 

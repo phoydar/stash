@@ -60,6 +60,7 @@ final class StorageContainer: Identifiable {
     var name: String
     var location: String?
     var details: String?
+    var photoFilename: String?
     var tags: [String]
     var createdAt: Date
     var updatedAt: Date
@@ -72,6 +73,7 @@ final class StorageContainer: Identifiable {
         name: String,
         location: String? = nil,
         details: String? = nil,
+        photoFilename: String? = nil,
         tags: [String] = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
@@ -81,6 +83,7 @@ final class StorageContainer: Identifiable {
         self.name = name
         self.location = location
         self.details = details
+        self.photoFilename = photoFilename
         self.tags = tags
         self.createdAt = createdAt
         self.updatedAt = updatedAt

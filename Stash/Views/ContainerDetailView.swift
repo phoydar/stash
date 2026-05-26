@@ -54,6 +54,14 @@ private struct ContainerDetailContent: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 10) {
+                    if container.photoFilename != nil {
+                        PhotoThumbnailView(
+                            filename: container.photoFilename,
+                            size: 132,
+                            cornerRadius: SBRadius.large
+                        )
+                    }
+
                     if let location = container.location, !location.isEmpty {
                         Label(location, systemImage: "mappin.and.ellipse")
                             .foregroundStyle(Color.sbTextSecondary)
@@ -92,6 +100,7 @@ private struct ContainerDetailContent: View {
                         .buttonStyle(.plain)
                         .swipeActions {
                             Button("Delete", role: .destructive) {
+                                PhotoStore.shared.deletePhoto(filename: item.photoFilename)
                                 modelContext.delete(item)
                                 container.touch()
                             }
@@ -104,6 +113,24 @@ private struct ContainerDetailContent: View {
             }
 
             Section("QR label") {
+                if container.photoFilename != nil {
+                    HStack(spacing: SBSpacing.medium) {
+                        PhotoThumbnailView(
+                            filename: container.photoFilename,
+                            fallbackSystemImage: "shippingbox"
+                        )
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Bin thumbnail")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(Color.sbTextPrimary)
+                            Text("Used to identify this container while creating labels.")
+                                .font(.caption)
+                                .foregroundStyle(Color.sbTextSecondary)
+                        }
+                    }
+                }
+
                 if let labelImage {
                     Image(uiImage: labelImage)
                         .resizable()
@@ -181,24 +208,31 @@ private struct ItemRow: View {
     let item: InventoryItem
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(item.name)
-                    .font(.headline)
-                    .foregroundStyle(Color.sbTextPrimary)
-                Spacer()
-                Text("x\(item.quantity)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.sbTextSecondary)
-            }
+        HStack(spacing: SBSpacing.medium) {
+            PhotoThumbnailView(
+                filename: item.photoFilename,
+                fallbackSystemImage: "photo"
+            )
 
-            if let notes = item.notes, !notes.isEmpty {
-                Text(notes)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.sbTextSecondary)
-            }
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(item.name)
+                        .font(.headline)
+                        .foregroundStyle(Color.sbTextPrimary)
+                    Spacer()
+                    Text("x\(item.quantity)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.sbTextSecondary)
+                }
 
-            TagChipsView(tags: item.tags)
+                if let notes = item.notes, !notes.isEmpty {
+                    Text(notes)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.sbTextSecondary)
+                }
+
+                TagChipsView(tags: item.tags)
+            }
         }
         .padding(.vertical, 4)
     }

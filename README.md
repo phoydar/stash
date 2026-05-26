@@ -65,6 +65,7 @@ The app currently provides:
 - Reusable saved locations for container create/edit flows.
 - Container create, read, update, and delete flows.
 - Item create, read, update, delete, and quantity tracking.
+- Local bin and item photo attachments stored as files and shown as thumbnails.
 - All-items inventory view with tag and location filters.
 - A stable `stash://container/{uuid}` payload per container.
 - A black-on-white QR label preview per container.
@@ -121,6 +122,7 @@ Phase 1 MVP scope:
 - [x] SwiftData models for containers and items.
 - [x] Container create, read, update, and delete flows.
 - [x] Item create, read, update, delete, and basic quantity tracking.
+- [x] Bin and item photo thumbnails backed by local files.
 - [x] QR payload generation and parsing.
 - [x] Label preview and PDF label-sheet export.
 - [x] Camera scanner with permission handling.

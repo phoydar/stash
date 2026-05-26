@@ -7,6 +7,7 @@ final class InventoryItem: Identifiable {
     var name: String
     var quantity: Int
     var notes: String?
+    var photoFilename: String?
     var tags: [String]
     var createdAt: Date
     var updatedAt: Date
@@ -18,6 +19,7 @@ final class InventoryItem: Identifiable {
         name: String,
         quantity: Int = 1,
         notes: String? = nil,
+        photoFilename: String? = nil,
         tags: [String] = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
@@ -27,6 +29,7 @@ final class InventoryItem: Identifiable {
         self.name = name
         self.quantity = max(quantity, 1)
         self.notes = notes
+        self.photoFilename = photoFilename
         self.tags = tags
         self.createdAt = createdAt
         self.updatedAt = updatedAt
