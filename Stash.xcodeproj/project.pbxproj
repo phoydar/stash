@@ -15,6 +15,8 @@
 		2003A68F8F034D6758A293C9 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = F255114A3B54B762F84BF9A1 /* Config.swift */; };
 		2EA6612CE7F6BBCA3B50DCE1 /* SugarbuzzTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727C436432BA8D97F15418B9 /* SugarbuzzTheme.swift */; };
 		2FA72C85C26533FBDD562273 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE6E61B1E37ACBDC367166D /* AppRoute.swift */; };
+		33F7E3A8C5D9427FB00A3002 /* ReviewReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F7E3A8C5D9427FB00A3001 /* ReviewReminderService.swift */; };
+		44F7E3A8C5D9427FB00A4002 /* UsageReviewViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F7E3A8C5D9427FB00A4001 /* UsageReviewViews.swift */; };
 		4ABC5F74D2C361C0431B2911 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE48DBAB68E9E944D7AA11A7 /* Assets.xcassets */; };
 		52E17FE343F39C82689E29B6 /* InventoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B969C7BE7657DAB7FF53B6B8 /* InventoryItem.swift */; };
 		573C3D8C5A748EE1CCF7402D /* InventoryItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA86E8ADBA37E6D5B8A7B82 /* InventoryItemsView.swift */; };
@@ -57,6 +59,8 @@
 		29FED4141A6F214DEC4C177F /* ValidationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationView.swift; sourceTree = "<group>"; };
 		2CA04D5CBA5899B1AA1BF41A /* TagParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagParsing.swift; sourceTree = "<group>"; };
 		2D55650C1C6FAC83B8F17A15 /* ActivityShareItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityShareItem.swift; sourceTree = "<group>"; };
+		33F7E3A8C5D9427FB00A3001 /* ReviewReminderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewReminderService.swift; sourceTree = "<group>"; };
+		44F7E3A8C5D9427FB00A4001 /* UsageReviewViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageReviewViews.swift; sourceTree = "<group>"; };
 		391F4AC805054C7548536948 /* TagEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagEditorView.swift; sourceTree = "<group>"; };
 		3C50BC1A729250995508C529 /* QRLabelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRLabelService.swift; sourceTree = "<group>"; };
 		40756264818D8392229D5EA7 /* ContainerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerDetailView.swift; sourceTree = "<group>"; };
@@ -155,6 +159,7 @@
 				53065CE8FE2EE1099A17A992 /* QRCodeService.swift */,
 				3C50BC1A729250995508C529 /* QRLabelService.swift */,
 				54B9B7813A6B0DD4C73976C6 /* QRPayload.swift */,
+				33F7E3A8C5D9427FB00A3001 /* ReviewReminderService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -211,6 +216,7 @@
 				11F7E3A8C5D9427FB00A1001 /* PhotoViews.swift */,
 				7C12640F49C76017DDC52549 /* TagChipsView.swift */,
 				391F4AC805054C7548536948 /* TagEditorView.swift */,
+				44F7E3A8C5D9427FB00A4001 /* UsageReviewViews.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -331,6 +337,7 @@
 				AC82227B6BF8AF2F6A3E29C2 /* QRCodeService.swift in Sources */,
 				7418D61EE597FB33D8F2F89E /* QRLabelService.swift in Sources */,
 				F810A465DBC94E71103EED7A /* QRPayload.swift in Sources */,
+				33F7E3A8C5D9427FB00A3002 /* ReviewReminderService.swift in Sources */,
 				EA61CA753BBE323A0F591DFC /* ScanHomeView.swift in Sources */,
 				FD17C4B1CB949B9B998A5D20 /* ScannerView.swift in Sources */,
 				9FD624406ADCED362218119E /* SearchView.swift in Sources */,
@@ -340,6 +347,7 @@
 				93CF0F11A58591A247671E2F /* TagChipsView.swift in Sources */,
 				0E6833CA8D568F2B70D0F41C /* TagEditorView.swift in Sources */,
 				F0A47BB33AD70A8FBDEBA1BF /* TagParsing.swift in Sources */,
+				44F7E3A8C5D9427FB00A4002 /* UsageReviewViews.swift in Sources */,
 				7F7ECDBBE6A53A7A30A83A97 /* ValidationContainer.swift in Sources */,
 				6481015CF502BC72505CFA09 /* ValidationView.swift in Sources */,
 			);

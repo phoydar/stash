@@ -8,6 +8,9 @@ struct InventoryItemsView: View {
 
     @State private var selectedTag: String?
     @State private var selectedLocation: String?
+    @State private var selectedUsageFilter: UsageFilter = .all
+    @State private var selectedReviewStatus: InventoryReviewStatus?
+    @State private var sortMode: ItemSortMode = .name
 
     private var allItems: [InventoryItemEntry] {
         containers.flatMap { container in
@@ -15,14 +18,7 @@ struct InventoryItemsView: View {
                 InventoryItemEntry(item: item, container: container)
             }
         }
-        .sorted { lhs, rhs in
-            let itemComparison = lhs.item.name.localizedCaseInsensitiveCompare(rhs.item.name)
-            if itemComparison != .orderedSame {
-                return itemComparison == .orderedAscending
-            }
-
-            return lhs.container.name.localizedCaseInsensitiveCompare(rhs.container.name) == .orderedAscending
-        }
+        .sorted(by: sortEntries)
     }
 
     private var filteredItems: [InventoryItemEntry] {
@@ -37,7 +33,13 @@ struct InventoryItemsView: View {
                 entry.container.normalizedLocation?.localizedCaseInsensitiveCompare(selectedLocation) == .orderedSame
             } ?? true
 
-            return matchesTag && matchesLocation
+            let matchesUsage = selectedUsageFilter.matches(entry.item)
+
+            let matchesReviewStatus = selectedReviewStatus.map { status in
+                entry.item.reviewStatus == status
+            } ?? true
+
+            return matchesTag && matchesLocation && matchesUsage && matchesReviewStatus
         }
     }
 
@@ -50,7 +52,10 @@ struct InventoryItemsView: View {
     }
 
     private var hasActiveFilters: Bool {
-        selectedTag != nil || selectedLocation != nil
+        selectedTag != nil
+            || selectedLocation != nil
+            || selectedUsageFilter != .all
+            || selectedReviewStatus != nil
     }
 
     var body: some View {
@@ -77,8 +82,12 @@ struct InventoryItemsView: View {
                                 InventoryFilterChips(
                                     selectedTag: selectedTag,
                                     selectedLocation: selectedLocation,
+                                    selectedUsageFilter: selectedUsageFilter,
+                                    selectedReviewStatus: selectedReviewStatus,
                                     clearTag: { selectedTag = nil },
                                     clearLocation: { selectedLocation = nil },
+                                    clearUsage: { selectedUsageFilter = .all },
+                                    clearReviewStatus: { selectedReviewStatus = nil },
                                     clearAll: clearFilters
                                 )
                             }
@@ -89,6 +98,31 @@ struct InventoryItemsView: View {
                             ForEach(filteredItems) { entry in
                                 NavigationLink(value: AppRoute.container(entry.container.qrID)) {
                                     InventoryItemRow(entry: entry)
+                                }
+                                .contextMenu {
+                                    Button {
+                                        entry.item.markUsed()
+                                    } label: {
+                                        Label("Used today", systemImage: "hand.tap")
+                                    }
+
+                                    Divider()
+
+                                    ForEach(InventoryReviewStatus.allCases) { status in
+                                        Button {
+                                            entry.item.setReviewStatus(status)
+                                        } label: {
+                                            Label(status.displayName, systemImage: status.systemImage)
+                                        }
+                                    }
+                                }
+                                .swipeActions(edge: .leading) {
+                                    Button {
+                                        entry.item.markUsed()
+                                    } label: {
+                                        Label("Used", systemImage: "hand.tap")
+                                    }
+                                    .tint(.sbMoss)
                                 }
                                 .listRowBackground(Color.sbSurface)
                             }
@@ -101,6 +135,54 @@ struct InventoryItemsView: View {
             .navigationTitle("Items")
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu {
+                        ForEach(UsageFilter.allCases) { usageFilter in
+                            Button {
+                                selectedUsageFilter = usageFilter
+                            } label: {
+                                CheckmarkMenuLabel(
+                                    title: usageFilter.displayName,
+                                    isSelected: selectedUsageFilter == usageFilter
+                                )
+                            }
+                        }
+                    } label: {
+                        Label("Usage Filter", systemImage: "clock.arrow.circlepath")
+                    }
+
+                    Menu {
+                        Button {
+                            selectedReviewStatus = nil
+                        } label: {
+                            CheckmarkMenuLabel(title: "All Review Statuses", isSelected: selectedReviewStatus == nil)
+                        }
+
+                        ForEach(InventoryReviewStatus.allCases) { status in
+                            Button {
+                                selectedReviewStatus = status
+                            } label: {
+                                CheckmarkMenuLabel(
+                                    title: status.displayName,
+                                    isSelected: selectedReviewStatus == status
+                                )
+                            }
+                        }
+                    } label: {
+                        Label("Review Filter", systemImage: "checklist")
+                    }
+
+                    Menu {
+                        ForEach(ItemSortMode.allCases) { mode in
+                            Button {
+                                sortMode = mode
+                            } label: {
+                                CheckmarkMenuLabel(title: mode.displayName, isSelected: sortMode == mode)
+                            }
+                        }
+                    } label: {
+                        Label("Sort", systemImage: "arrow.up.arrow.down")
+                    }
+
                     Menu {
                         Button {
                             selectedTag = nil
@@ -152,6 +234,26 @@ struct InventoryItemsView: View {
     private func clearFilters() {
         selectedTag = nil
         selectedLocation = nil
+        selectedUsageFilter = .all
+        selectedReviewStatus = nil
+    }
+
+    private func sortEntries(_ lhs: InventoryItemEntry, _ rhs: InventoryItemEntry) -> Bool {
+        switch sortMode {
+        case .name:
+            let itemComparison = lhs.item.name.localizedCaseInsensitiveCompare(rhs.item.name)
+            if itemComparison != .orderedSame {
+                return itemComparison == .orderedAscending
+            }
+
+            return lhs.container.name.localizedCaseInsensitiveCompare(rhs.container.name) == .orderedAscending
+        case .longestUnused:
+            return lhs.item.lastUseReferenceDate < rhs.item.lastUseReferenceDate
+        case .recentlyUsed:
+            return lhs.item.lastUseReferenceDate > rhs.item.lastUseReferenceDate
+        case .dateAdded:
+            return lhs.item.createdAt > rhs.item.createdAt
+        }
     }
 
     private func uniqueSorted(_ values: [String]) -> [String] {
@@ -210,6 +312,7 @@ private struct InventoryItemRow: View {
                     }
                 }
 
+                ItemUsageChipsView(item: entry.item)
                 TagChipsView(tags: entry.item.tags)
             }
         }
@@ -233,8 +336,12 @@ private struct CheckmarkMenuLabel: View {
 private struct InventoryFilterChips: View {
     let selectedTag: String?
     let selectedLocation: String?
+    let selectedUsageFilter: UsageFilter
+    let selectedReviewStatus: InventoryReviewStatus?
     let clearTag: () -> Void
     let clearLocation: () -> Void
+    let clearUsage: () -> Void
+    let clearReviewStatus: () -> Void
     let clearAll: () -> Void
 
     var body: some View {
@@ -246,6 +353,22 @@ private struct InventoryFilterChips: View {
 
                 if let selectedLocation {
                     FilterChip(title: selectedLocation, systemImage: "mappin.and.ellipse", action: clearLocation)
+                }
+
+                if selectedUsageFilter != .all {
+                    FilterChip(
+                        title: selectedUsageFilter.displayName,
+                        systemImage: selectedUsageFilter.systemImage,
+                        action: clearUsage
+                    )
+                }
+
+                if let selectedReviewStatus {
+                    FilterChip(
+                        title: selectedReviewStatus.displayName,
+                        systemImage: selectedReviewStatus.systemImage,
+                        action: clearReviewStatus
+                    )
                 }
             }
 
@@ -275,6 +398,80 @@ private struct FilterChip: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+    }
+}
+
+private enum UsageFilter: String, CaseIterable, Identifiable {
+    case all
+    case neverUsed
+    case unusedSixMonths
+    case unusedTwelveMonths
+
+    var id: String {
+        rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .all:
+            return "All Usage"
+        case .neverUsed:
+            return "Never Used"
+        case .unusedSixMonths:
+            return "Unused 6+ Months"
+        case .unusedTwelveMonths:
+            return "Unused 12+ Months"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .all:
+            return "line.3.horizontal.decrease.circle"
+        case .neverUsed:
+            return "clock"
+        case .unusedSixMonths:
+            return "clock.badge.questionmark"
+        case .unusedTwelveMonths:
+            return "exclamationmark.circle"
+        }
+    }
+
+    func matches(_ item: InventoryItem) -> Bool {
+        switch self {
+        case .all:
+            return true
+        case .neverUsed:
+            return item.lastUsedAt == nil
+        case .unusedSixMonths:
+            return item.hasNoUse(sinceMonths: 6)
+        case .unusedTwelveMonths:
+            return item.hasNoUse(sinceMonths: 12)
+        }
+    }
+}
+
+private enum ItemSortMode: String, CaseIterable, Identifiable {
+    case name
+    case longestUnused
+    case recentlyUsed
+    case dateAdded
+
+    var id: String {
+        rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .name:
+            return "Name"
+        case .longestUnused:
+            return "Longest Unused"
+        case .recentlyUsed:
+            return "Recently Used"
+        case .dateAdded:
+            return "Date Added"
+        }
     }
 }
 

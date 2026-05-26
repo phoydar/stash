@@ -66,7 +66,8 @@ The app currently provides:
 - Container create, read, update, and delete flows.
 - Item create, read, update, delete, and quantity tracking.
 - Local bin and item photo attachments stored as files and shown as thumbnails.
-- All-items inventory view with tag and location filters.
+- Usage and declutter tracking for first-added dates, bin opens/scans, item use, review status, and optional local review reminders.
+- All-items inventory view with tag, location, usage-age, and review-status filters.
 - A stable `stash://container/{uuid}` payload per container.
 - A black-on-white QR label preview per container.
 - A share-sheet handoff that exports a printable PDF label sheet for desktop printing.
@@ -90,6 +91,7 @@ Physical validation should be recorded in:
 | Navigation | `NavigationStack` with typed routes |
 | QR generation | Core Image |
 | QR scanning | AVFoundation |
+| Review reminders | Local notifications through `UserNotifications` |
 | Label rendering | `UIGraphicsImageRenderer` for preview, `UIGraphicsPDFRenderer` for sheets |
 | Printing | Desktop printer from PDF label sheets |
 | Distribution | Personal install through Xcode |
@@ -123,6 +125,7 @@ Phase 1 MVP scope:
 - [x] Container create, read, update, and delete flows.
 - [x] Item create, read, update, delete, and basic quantity tracking.
 - [x] Bin and item photo thumbnails backed by local files.
+- [x] Usage and declutter tracking with local review reminders.
 - [x] QR payload generation and parsing.
 - [x] Label preview and PDF label-sheet export.
 - [x] Camera scanner with permission handling.

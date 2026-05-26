@@ -82,12 +82,13 @@ struct ScanHomeView: View {
             return
         }
 
-        guard containers.contains(where: { $0.qrID == uuid }) else {
+        guard let container = containers.first(where: { $0.qrID == uuid }) else {
             scanMessage = "Unknown container: \(uuid.uuidString)"
             alertMessage = "This is a valid Stash container QR code, but it does not match a saved container on this device."
             return
         }
 
+        container.markScanned()
         scanMessage = "Matched container: \(uuid.uuidString)"
         onRouteToContainer(uuid)
     }

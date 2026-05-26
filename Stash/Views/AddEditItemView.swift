@@ -14,15 +14,28 @@ struct AddEditItemView: View {
     @State private var tags: [String]
     @State private var selectedPhotoData: Data?
     @State private var shouldRemovePhoto = false
+    @State private var hasLastUsedDate: Bool
+    @State private var lastUsedAt: Date
+    @State private var reviewStatus: InventoryReviewStatus
+    @State private var hasReminder: Bool
+    @State private var reviewReminderAt: Date
     @State private var errorMessage: String?
+    @State private var isSaving = false
 
     init(container: StorageContainer, item: InventoryItem? = nil) {
         self.container = container
         self.item = item
+        let reminderDate = item?.reviewReminderAt
+        let fallbackReminderDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
         _name = State(initialValue: item?.name ?? "")
         _quantity = State(initialValue: item?.quantity ?? 1)
         _notes = State(initialValue: item?.notes ?? "")
         _tags = State(initialValue: item?.tags ?? [])
+        _hasLastUsedDate = State(initialValue: item?.lastUsedAt != nil)
+        _lastUsedAt = State(initialValue: item?.lastUsedAt ?? Date())
+        _reviewStatus = State(initialValue: item?.reviewStatus ?? .unreviewed)
+        _hasReminder = State(initialValue: reminderDate.map { $0 > Date() } ?? false)
+        _reviewReminderAt = State(initialValue: reminderDate.map { max($0, Date()) } ?? fallbackReminderDate)
     }
 
     var body: some View {
@@ -56,6 +69,36 @@ struct AddEditItemView: View {
                     TextEditor(text: $notes)
                         .frame(minHeight: 100)
                 }
+
+                Section("Usage & review") {
+                    Picker("Review status", selection: $reviewStatus) {
+                        ForEach(InventoryReviewStatus.allCases) { status in
+                            Label(status.displayName, systemImage: status.systemImage)
+                                .tag(status)
+                        }
+                    }
+
+                    Toggle("Set last used date", isOn: $hasLastUsedDate)
+
+                    if hasLastUsedDate {
+                        DatePicker(
+                            "Last used",
+                            selection: $lastUsedAt,
+                            displayedComponents: [.date]
+                        )
+                    }
+
+                    Toggle("Review reminder", isOn: $hasReminder)
+
+                    if hasReminder {
+                        DatePicker(
+                            "Remind me",
+                            selection: $reviewReminderAt,
+                            in: Date()...,
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                    }
+                }
             }
             .scrollContentBackground(.hidden)
             .background(Color.sbCanvas.ignoresSafeArea())
@@ -71,9 +114,11 @@ struct AddEditItemView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        save()
+                        Task {
+                            await save()
+                        }
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
                 }
             }
             .alert("Item error", isPresented: Binding(
@@ -87,10 +132,15 @@ struct AddEditItemView: View {
         }
     }
 
-    private func save() {
+    @MainActor
+    private func save() async {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        isSaving = true
+        defer { isSaving = false }
 
         do {
+            let savedItem: InventoryItem
+
             if let item {
                 item.name = trimmedName
                 item.quantity = quantity
@@ -98,6 +148,8 @@ struct AddEditItemView: View {
                 item.photoFilename = try resolvedPhotoFilename(existingFilename: item.photoFilename)
                 item.tags = tags
                 item.touch()
+                applyUsageAndReview(to: item)
+                savedItem = item
             } else {
                 let item = InventoryItem(
                     name: trimmedName,
@@ -110,12 +162,24 @@ struct AddEditItemView: View {
                 modelContext.insert(item)
                 container.items.append(item)
                 container.touch()
+                applyUsageAndReview(to: item)
+                savedItem = item
             }
+
+            try await ReviewReminderService.shared.updateReminder(
+                for: savedItem,
+                at: hasReminder ? reviewReminderAt : nil
+            )
 
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func applyUsageAndReview(to item: InventoryItem) {
+        item.lastUsedAt = hasLastUsedDate ? lastUsedAt : nil
+        item.setReviewStatus(reviewStatus)
     }
 
     private func resolvedPhotoFilename(existingFilename: String?) throws -> String? {

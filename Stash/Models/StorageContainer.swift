@@ -61,6 +61,10 @@ final class StorageContainer: Identifiable {
     var location: String?
     var details: String?
     var photoFilename: String?
+    var lastOpenedAt: Date?
+    var lastScannedAt: Date?
+    var openCount: Int = 0
+    var scanCount: Int = 0
     var tags: [String]
     var createdAt: Date
     var updatedAt: Date
@@ -74,6 +78,10 @@ final class StorageContainer: Identifiable {
         location: String? = nil,
         details: String? = nil,
         photoFilename: String? = nil,
+        lastOpenedAt: Date? = nil,
+        lastScannedAt: Date? = nil,
+        openCount: Int = 0,
+        scanCount: Int = 0,
         tags: [String] = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
@@ -84,6 +92,10 @@ final class StorageContainer: Identifiable {
         self.location = location
         self.details = details
         self.photoFilename = photoFilename
+        self.lastOpenedAt = lastOpenedAt
+        self.lastScannedAt = lastScannedAt
+        self.openCount = max(openCount, 0)
+        self.scanCount = max(scanCount, 0)
         self.tags = tags
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -100,5 +112,17 @@ final class StorageContainer: Identifiable {
 
     func touch() {
         updatedAt = Date()
+    }
+
+    func markOpened(at date: Date = Date()) {
+        lastOpenedAt = date
+        openCount += 1
+        touch()
+    }
+
+    func markScanned(at date: Date = Date()) {
+        lastScannedAt = date
+        scanCount += 1
+        touch()
     }
 }

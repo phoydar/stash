@@ -28,6 +28,7 @@ struct ContainerListView: View {
                             .listRowBackground(Color.sbSurface)
                             .swipeActions {
                                 Button("Delete", role: .destructive) {
+                                    ReviewReminderService.shared.cancelReminders(for: container)
                                     PhotoStore.shared.deletePhotos(for: container)
                                     modelContext.delete(container)
                                 }

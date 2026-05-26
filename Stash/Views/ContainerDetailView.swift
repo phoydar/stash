@@ -83,6 +83,21 @@ private struct ContainerDetailContent: View {
             }
             .listRowBackground(Color.sbSurface)
 
+            Section("Lifecycle") {
+                LifecycleDateRow(title: "First added", date: container.createdAt)
+                LifecycleDateRow(title: "Last opened", date: container.lastOpenedAt)
+                LifecycleDateRow(title: "Last scanned", date: container.lastScannedAt)
+                LifecycleCountRow(title: "Times opened", count: container.openCount)
+                LifecycleCountRow(title: "Times scanned", count: container.scanCount)
+
+                Button {
+                    container.markOpened()
+                } label: {
+                    Label("Mark opened", systemImage: "shippingbox.and.arrow.backward")
+                }
+            }
+            .listRowBackground(Color.sbSurface)
+
             Section {
                 if sortedItems.isEmpty {
                     ContentUnavailableView(
@@ -98,8 +113,34 @@ private struct ContainerDetailContent: View {
                             ItemRow(item: item)
                         }
                         .buttonStyle(.plain)
+                        .contextMenu {
+                            Button {
+                                markItemUsed(item)
+                            } label: {
+                                Label("Used today", systemImage: "hand.tap")
+                            }
+
+                            Divider()
+
+                            ForEach(InventoryReviewStatus.allCases) { status in
+                                Button {
+                                    setReviewStatus(status, for: item)
+                                } label: {
+                                    Label(status.displayName, systemImage: status.systemImage)
+                                }
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                markItemUsed(item)
+                            } label: {
+                                Label("Used", systemImage: "hand.tap")
+                            }
+                            .tint(.sbMoss)
+                        }
                         .swipeActions {
                             Button("Delete", role: .destructive) {
+                                ReviewReminderService.shared.cancelReminder(for: item)
                                 PhotoStore.shared.deletePhoto(filename: item.photoFilename)
                                 modelContext.delete(item)
                                 container.touch()
@@ -202,6 +243,14 @@ private struct ContainerDetailContent: View {
         }
     }
 
+    private func markItemUsed(_ item: InventoryItem) {
+        item.markUsed()
+    }
+
+    private func setReviewStatus(_ status: InventoryReviewStatus, for item: InventoryItem) {
+        item.setReviewStatus(status)
+    }
+
 }
 
 private struct ItemRow: View {
@@ -231,6 +280,7 @@ private struct ItemRow: View {
                         .foregroundStyle(Color.sbTextSecondary)
                 }
 
+                ItemUsageChipsView(item: item)
                 TagChipsView(tags: item.tags)
             }
         }
