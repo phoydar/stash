@@ -389,15 +389,23 @@ private struct FilterChip: View {
 
     var body: some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage)
-                .font(.caption.weight(.medium))
-                .padding(.horizontal, 9)
-                .padding(.vertical, 5)
-                .background(Color.sbBuzzSoft)
-                .foregroundStyle(Color.sbBuzz)
-                .clipShape(Capsule())
+            HStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .imageScale(.small)
+
+                Text(title)
+                    .lineLimit(1)
+            }
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .background(Color.sbBuzzSoft)
+            .foregroundStyle(Color.sbBuzz)
+            .clipShape(Capsule())
+            .fixedSize(horizontal: true, vertical: false)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Clear \(title) filter")
     }
 }
 

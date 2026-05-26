@@ -38,13 +38,12 @@ struct ReviewStatusChip: View {
     let status: InventoryReviewStatus
 
     var body: some View {
-        Label(status.displayName, systemImage: status.systemImage)
-            .font(.caption2.weight(.medium))
-            .foregroundStyle(foregroundColor)
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .background(backgroundColor)
-            .clipShape(Capsule())
+        UsageBadgeContent(
+            title: status.displayName,
+            systemImage: status.systemImage,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor
+        )
     }
 
     private var foregroundColor: Color {
@@ -83,7 +82,9 @@ struct ItemUsageChipsView: View {
 
     var body: some View {
         FlowLayout(spacing: 6) {
-            ReviewStatusChip(status: item.reviewStatus)
+            if item.reviewStatus != .unreviewed {
+                ReviewStatusChip(status: item.reviewStatus)
+            }
 
             if let lastUsedAt = item.lastUsedAt {
                 UsageChip(
@@ -128,13 +129,12 @@ private struct UsageChip: View {
     var tone: Tone = .neutral
 
     var body: some View {
-        Label(title, systemImage: systemImage)
-            .font(.caption2.weight(.medium))
-            .foregroundStyle(foregroundColor)
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .background(backgroundColor)
-            .clipShape(Capsule())
+        UsageBadgeContent(
+            title: title,
+            systemImage: systemImage,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor
+        )
     }
 
     private var foregroundColor: Color {
@@ -161,5 +161,31 @@ private struct UsageChip: View {
         case .reminder:
             return .sbBuzzSoft
         }
+    }
+}
+
+private struct UsageBadgeContent: View {
+    let title: String
+    let systemImage: String
+    let foregroundColor: Color
+    let backgroundColor: Color
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: systemImage)
+                .imageScale(.small)
+
+            Text(title)
+                .lineLimit(1)
+        }
+        .font(.caption2.weight(.medium))
+        .foregroundStyle(foregroundColor)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(backgroundColor)
+        .clipShape(Capsule())
+        .fixedSize(horizontal: true, vertical: false)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
     }
 }
