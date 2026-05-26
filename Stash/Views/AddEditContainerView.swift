@@ -33,8 +33,11 @@ struct AddEditContainerView: View {
         NavigationStack {
             Form {
                 Section("Container") {
-                    TextField("Container name", text: $name)
+                    TextField("Container name (optional)", text: $name)
                     TagEditorView(tags: $tags)
+                    Text("Leave the name blank if you want to write it on the printed QR label by hand.")
+                        .font(.caption)
+                        .foregroundStyle(Color.sbTextSecondary)
                 }
 
                 PhotoPickerSection(
@@ -152,7 +155,6 @@ struct AddEditContainerView: View {
                     Button("Save") {
                         save()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .alert("Container error", isPresented: Binding(
@@ -167,11 +169,11 @@ struct AddEditContainerView: View {
     }
 
     private func save() {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let storedName = ContainerName.storedName(from: name)
 
         do {
             if let container {
-                container.name = trimmedName
+                container.name = storedName
                 container.location = resolvedLocationForSave()
                 container.details = TagParsing.optionalText(details)
                 container.photoFilename = try resolvedPhotoFilename(existingFilename: container.photoFilename)
@@ -179,7 +181,7 @@ struct AddEditContainerView: View {
                 container.touch()
             } else {
                 let container = StorageContainer(
-                    name: trimmedName,
+                    name: storedName,
                     location: resolvedLocationForSave(),
                     details: TagParsing.optionalText(details),
                     photoFilename: try resolvedPhotoFilename(existingFilename: nil),

@@ -5,7 +5,7 @@ struct ContainerListView: View {
     @Binding var path: [AppRoute]
 
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \StorageContainer.name) private var containers: [StorageContainer]
+    @Query private var containers: [StorageContainer]
 
     @State private var isAddingContainer = false
     @State private var isComposingLabels = false
@@ -21,7 +21,7 @@ struct ContainerListView: View {
                     )
                 } else {
                     List {
-                        ForEach(containers) { container in
+                        ForEach(sortedContainers) { container in
                             NavigationLink(value: AppRoute.container(container.qrID)) {
                                 ContainerRow(container: container)
                             }
@@ -72,6 +72,12 @@ struct ContainerListView: View {
             }
         }
     }
+
+    private var sortedContainers: [StorageContainer] {
+        containers.sorted {
+            $0.sortName.localizedCaseInsensitiveCompare($1.sortName) == .orderedAscending
+        }
+    }
 }
 
 private struct ContainerRow: View {
@@ -85,7 +91,7 @@ private struct ContainerRow: View {
             )
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(container.name)
+                Text(container.displayName)
                     .font(.headline)
                     .foregroundStyle(Color.sbTextPrimary)
 

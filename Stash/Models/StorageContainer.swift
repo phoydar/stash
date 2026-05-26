@@ -30,6 +30,24 @@ enum LocationName {
     }
 }
 
+enum ContainerName {
+    static let unnamedDisplayName = "Unlabeled container"
+
+    static func displayName(from value: String) -> String? {
+        let collapsed = value
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+
+        return collapsed.isEmpty ? nil : collapsed
+    }
+
+    static func storedName(from value: String) -> String {
+        displayName(from: value) ?? ""
+    }
+}
+
 @Model
 final class StorageLocation: Identifiable {
     @Attribute(.unique) var id: UUID
@@ -88,7 +106,7 @@ final class StorageContainer: Identifiable {
         items: [InventoryItem] = []
     ) {
         self.qrID = qrID
-        self.name = name
+        self.name = ContainerName.storedName(from: name)
         self.location = location
         self.details = details
         self.photoFilename = photoFilename
@@ -108,6 +126,14 @@ final class StorageContainer: Identifiable {
 
     var id: UUID {
         qrID
+    }
+
+    var displayName: String {
+        ContainerName.displayName(from: name) ?? ContainerName.unnamedDisplayName
+    }
+
+    var sortName: String {
+        ContainerName.displayName(from: name) ?? "zzzz \(qrID.uuidString)"
     }
 
     func touch() {

@@ -26,7 +26,7 @@ struct ContainerDetailView: View {
                 )
             }
         }
-        .navigationTitle(containers.first?.name ?? "Container")
+        .navigationTitle(containers.first?.displayName ?? "Container")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -54,6 +54,10 @@ private struct ContainerDetailContent: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 10) {
+                    Text(container.displayName)
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(Color.sbTextPrimary)
+
                     if container.photoFilename != nil {
                         PhotoThumbnailView(
                             filename: container.photoFilename,

@@ -4,7 +4,7 @@ import SwiftUI
 struct InventoryItemsView: View {
     @Binding var path: [AppRoute]
 
-    @Query(sort: \StorageContainer.name) private var containers: [StorageContainer]
+    @Query private var containers: [StorageContainer]
 
     @State private var selectedTag: String?
     @State private var selectedLocation: String?
@@ -246,7 +246,7 @@ struct InventoryItemsView: View {
                 return itemComparison == .orderedAscending
             }
 
-            return lhs.container.name.localizedCaseInsensitiveCompare(rhs.container.name) == .orderedAscending
+            return lhs.container.sortName.localizedCaseInsensitiveCompare(rhs.container.sortName) == .orderedAscending
         case .longestUnused:
             return lhs.item.lastUseReferenceDate < rhs.item.lastUseReferenceDate
         case .recentlyUsed:
@@ -301,7 +301,7 @@ private struct InventoryItemRow: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(entry.container.name)
+                    Text(entry.container.displayName)
                         .font(.subheadline)
                         .foregroundStyle(Color.sbTextSecondary)
 

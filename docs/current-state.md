@@ -18,6 +18,7 @@ Phase 1 MVP implementation has started. The app is no longer just a Phase 0 vali
 - `InventoryItem` model with name, quantity, optional notes/photo filename, last-used tracking, use count, review status, optional review reminder metadata, tags, timestamps, and parent container.
 - `StorageLocation` model for reusable, locally stored container locations.
 - Containers tab with list, add, edit, delete, and detail navigation.
+- Containers can be saved without a typed name so the printed QR label can be named by hand with a marker or pen; app surfaces show a stable "Unlabeled container" fallback.
 - Container create/edit flow uses saved locations, supports inline location creation, and deduplicates case/whitespace variants.
 - New container flow supports adding and removing initial item rows with quantity controls before saving.
 - Container and item edit flows support local photo selection, replacement, and removal.

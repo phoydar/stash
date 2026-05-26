@@ -11,9 +11,13 @@ struct QRLabelContent: Equatable {
         QRPayload.makeURLString(for: qrID)
     }
 
+    var printableName: String? {
+        ContainerName.displayName(from: name)
+    }
+
     init(qrID: UUID, name: String, location: String? = nil, tags: [String] = []) {
         self.qrID = qrID
-        self.name = name
+        self.name = ContainerName.storedName(from: name)
         self.location = location ?? ""
         self.tags = tags
     }
@@ -323,8 +327,11 @@ final class QRLabelService {
             .paragraphStyle: bodyStyle
         ]
 
-        NSAttributedString(string: container.name, attributes: titleAttributes)
-            .draw(with: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 62), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
+        drawLabelName(
+            container.printableName,
+            in: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 62),
+            attributes: titleAttributes
+        )
 
         NSAttributedString(string: container.location, attributes: bodyAttributes)
             .draw(with: CGRect(x: rect.minX, y: rect.minY + 72, width: rect.width, height: 42), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
@@ -398,8 +405,11 @@ final class QRLabelService {
             .paragraphStyle: bodyStyle
         ]
 
-        NSAttributedString(string: container.name, attributes: titleAttributes)
-            .draw(with: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: titleHeight), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
+        drawLabelName(
+            container.printableName,
+            in: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: titleHeight),
+            attributes: titleAttributes
+        )
 
         NSAttributedString(string: container.location, attributes: bodyAttributes)
             .draw(with: CGRect(x: rect.minX, y: rect.minY + bodyY, width: rect.width, height: bodyHeight), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
@@ -407,5 +417,18 @@ final class QRLabelService {
         let tags = container.tags.map { "#\($0)" }.joined(separator: " ")
         NSAttributedString(string: tags, attributes: captionAttributes)
             .draw(with: CGRect(x: rect.minX, y: rect.minY + captionY, width: rect.width, height: captionHeight), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
+    }
+
+    private func drawLabelName(
+        _ name: String?,
+        in rect: CGRect,
+        attributes: [NSAttributedString.Key: Any]
+    ) {
+        guard let name else {
+            return
+        }
+
+        NSAttributedString(string: name, attributes: attributes)
+            .draw(with: rect, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
     }
 }

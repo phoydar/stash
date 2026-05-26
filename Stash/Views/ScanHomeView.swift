@@ -5,7 +5,7 @@ struct ScanHomeView: View {
     @Binding var path: [AppRoute]
     let onRouteToContainer: (UUID) -> Void
 
-    @Query(sort: \StorageContainer.name) private var containers: [StorageContainer]
+    @Query private var containers: [StorageContainer]
 
     @State private var scannerIsPresented = false
     @State private var scanMessage = "No scan yet"
@@ -32,10 +32,10 @@ struct ScanHomeView: View {
                         Text("Create a container before scanning a Stash label.")
                             .foregroundStyle(Color.sbTextSecondary)
                     } else {
-                        ForEach(containers) { container in
+                        ForEach(sortedContainers) { container in
                             NavigationLink(value: AppRoute.container(container.qrID)) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(container.name)
+                                    Text(container.displayName)
                                         .foregroundStyle(Color.sbTextPrimary)
                                     Text(container.qrID.uuidString)
                                         .font(.caption.monospaced())
@@ -72,6 +72,12 @@ struct ScanHomeView: View {
                     ContainerDetailView(qrID: uuid)
                 }
             }
+        }
+    }
+
+    private var sortedContainers: [StorageContainer] {
+        containers.sorted {
+            $0.sortName.localizedCaseInsensitiveCompare($1.sortName) == .orderedAscending
         }
     }
 

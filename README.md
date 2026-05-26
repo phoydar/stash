@@ -67,7 +67,7 @@ The app currently provides:
 
 - SwiftData `StorageContainer` and `InventoryItem` models.
 - Reusable saved locations for container create/edit flows.
-- Container create, read, update, and delete flows.
+- Container create, read, update, and delete flows, including unnamed containers for labels that will be handwritten.
 - Item create, read, update, delete, and quantity tracking.
 - Local bin and item photo attachments stored as files and shown as thumbnails.
 - Usage and declutter tracking for first-added dates, bin opens/scans, item use, review status, and optional local review reminders.

@@ -4,7 +4,7 @@ import SwiftUI
 struct LabelSheetComposerView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @Query(sort: \StorageContainer.name) private var containers: [StorageContainer]
+    @Query private var containers: [StorageContainer]
 
     private let labelService = QRLabelService()
     private let configuration = QRLabelSheetConfiguration.phaseZero
@@ -93,7 +93,7 @@ struct LabelSheetComposerView: View {
             .sheet(item: $selectedSlot) { slot in
                 LabelSlotPickerView(
                     slotNumber: slot.index + 1,
-                    containers: containers,
+                    containers: sortedContainers,
                     selectedContainerID: slotAssignments[slot.index]
                 ) { containerID in
                     if let containerID {
@@ -122,8 +122,14 @@ struct LabelSheetComposerView: View {
         slotAssignments.keys.sorted()
     }
 
+    private var sortedContainers: [StorageContainer] {
+        containers.sorted {
+            $0.sortName.localizedCaseInsensitiveCompare($1.sortName) == .orderedAscending
+        }
+    }
+
     private func containerName(for slotIndex: Int) -> String? {
-        container(for: slotIndex)?.name
+        container(for: slotIndex)?.displayName
     }
 
     private func container(for slotIndex: Int) -> StorageContainer? {
@@ -191,7 +197,7 @@ private struct SheetSlotButton: View {
                         )
                     }
 
-                    Text(container?.name ?? "Empty")
+                    Text(container?.displayName ?? "Empty")
                         .font(.caption)
                         .fontWeight(container == nil ? .regular : .semibold)
                         .foregroundStyle(container == nil ? Color.sbTextSecondary : Color.sbTextPrimary)
@@ -232,7 +238,7 @@ private struct LabelSlotPickerView: View {
                                 )
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(container.name)
+                                    Text(container.displayName)
                                         .foregroundStyle(Color.sbTextPrimary)
 
                                     if let location = container.location, !location.isEmpty {

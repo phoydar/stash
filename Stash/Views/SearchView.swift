@@ -4,16 +4,16 @@ import SwiftUI
 struct SearchView: View {
     @Binding var path: [AppRoute]
 
-    @Query(sort: \StorageContainer.name) private var containers: [StorageContainer]
+    @Query private var containers: [StorageContainer]
     @State private var query = ""
 
     private var results: [StorageContainer] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            return containers
+            return sortedContainers
         }
 
-        return containers.filter { container in
+        return sortedContainers.filter { container in
             container.matchesSearch(trimmed)
         }
     }
@@ -50,6 +50,12 @@ struct SearchView: View {
             }
         }
     }
+
+    private var sortedContainers: [StorageContainer] {
+        containers.sorted {
+            $0.sortName.localizedCaseInsensitiveCompare($1.sortName) == .orderedAscending
+        }
+    }
 }
 
 private struct SearchResultRow: View {
@@ -63,7 +69,7 @@ private struct SearchResultRow: View {
             )
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(container.name)
+                Text(container.displayName)
                     .font(.headline)
                     .foregroundStyle(Color.sbTextPrimary)
 
@@ -97,7 +103,7 @@ private extension StorageContainer {
     func matchesSearch(_ query: String) -> Bool {
         let needle = query.lowercased()
 
-        if name.lowercased().contains(needle) {
+        if displayName.lowercased().contains(needle) {
             return true
         }
 
