@@ -8,7 +8,9 @@ Phase 1 MVP implementation has started. The app is no longer just a Phase 0 vali
 
 ## Implemented
 
-- `AGENTS.md` is stable repo policy only. Durable handoff state belongs here, and local/session-only context belongs in ignored local files.
+- `AGENTS.md` is stable repo policy only. It must not contain generated memory blocks, recent-context timestamps, or transient session summaries.
+- Durable handoff state belongs in this file, while local/session-only scratch belongs in ignored local files such as `.agents.local.md`, `.claude.local.md`, `.codex.local.md`, `.agents/local-context.md`, `.claude/local-context.md`, or `.codex/local-context.md`.
+- `docs/agent-orchestration.md` records the agent source-of-truth order and Monday.com workflow for split-agent work.
 - SwiftData model container initialized in `StashApp`.
 - `StorageContainer` model with stable `qrID`, name, optional location/details/photo filename, lifecycle open/scan tracking, tags, timestamps, and cascade-owned items.
 - `InventoryItem` model with name, quantity, optional notes/photo filename, last-used tracking, use count, review status, optional review reminder metadata, tags, timestamps, and parent container.

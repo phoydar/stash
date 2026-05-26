@@ -33,7 +33,8 @@ Stash is a native iOS SwiftUI app for QR-labeled physical storage containers.
 
 ## Agent Context Policy
 
-- Do not put generated session memory, timestamps, or transient status in this file.
-- Keep durable project state in tracked docs such as `README.md` or `docs/current-state.md`.
-- Keep local/session-only notes in ignored local files.
+- Do not put generated session memory, timestamps, recent-context summaries, or transient status in this file.
+- Keep durable handoff state in the repo current-state doc, currently `docs/current-state.md`.
+- Keep local/session-only notes in ignored local files such as `.agents.local.md`, `.claude.local.md`, `.codex.local.md`, `.agents/local-context.md`, `.claude/local-context.md`, or `.codex/local-context.md`.
 - Do not use `git update-index --skip-worktree AGENTS.md` as the normal fix for generated context churn.
+
